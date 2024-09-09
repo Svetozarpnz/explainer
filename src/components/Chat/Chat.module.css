@@ -1,0 +1,33 @@
+.chatWrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 70vh;
+    border: 1px solid black;
+    width: 1100px;
+    border-radius: 5px;
+    background-color: lightgray;
+}
+.chatWrapper > div {
+    box-sizing: border-box;
+    height: 100%;
+    padding: 10px;
+}
+
+.chatWrapper > div:first-child {
+    width: 800px;
+    border-right: 1px solid black;
+}
+
+.chatWrapper > div:last-child {
+    width: 300px;
+}
+
+.question {
+    color: saddlebrown;
+}
+
+.answer {
+    display: flex;
+    align-items: end;
+}
