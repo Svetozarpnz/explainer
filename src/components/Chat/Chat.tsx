@@ -2,36 +2,39 @@ import React, {useContext} from 'react';
 import styles from './Chat.module.css';
 import {Link} from "../Link/Link";
 import {Context} from "../Context/Context";
+import {cn} from '../../utils/css';
 
 export const Chat = () => {
-    const {messages} = useContext(Context);
-    const topics = [{
-        id: '01',
-        question: 'Что такое замыкание?',
-        topic: 'Замыкания'
-    }];
+	const {messages} = useContext(Context);
+	const topics = [
+		{
+			id: '01', question: 'Что такое замыкание?', topic: 'Замыкания'
+		},
+		{
+			id: '02', question: 'Что есть функция в JS?', topic: 'Функции'
+		}
+	];
 
-    return (
-        <div className={styles.chatWrapper}>
-          <div>
-              {messages.map(({ isQuestion, text}, i) => {
-
-                  return (
-                    <div
-                        key={i}
-                        className={isQuestion ? styles.question : styles.answer}
-                    >
-                        {text}
-                    </div>
-                  )
-              })}
-          </div>
-            <div>
-                {topics.map(({id, question, topic}) => (
-                    <Link key={id} id={id} question={question}>{topic}</Link>
-                ))}
-
-            </div>
-        </div>
-    )
+	return (
+		<div className={styles.chatWrapper}>
+			<div>
+				{messages.map(({isQuestion, text}, i) => {
+					return (
+						<div className={cn(styles.messageWrapper, isQuestion ? styles.question : styles.answer)} key={i}>
+							<div className={cn(styles.message)}>
+								{text}
+							</div>
+						</div>
+					)
+				})}
+			</div>
+			<div>
+				{topics.map(({id, question, topic}) => (<Link key={id} id={id} question={question}>{topic}</Link>))}
+			</div>
+		</div>
+	)
 }
+
+const str = 'Замыкание - это $c:01::1:функция^ и внешние переменные. $d^ Ярким примером замыкания является' +
+	'функция со счетчиком: $n^$an:1:$cfunction { $n:2^}^^$d^$a:1:12:w:myFn ^^';
+

@@ -15,3 +15,6 @@
    
 ### Запуск: 
 `npm run start`
+
+
+3. MML - Message Metric Language. Язык разметки сообщений. 
