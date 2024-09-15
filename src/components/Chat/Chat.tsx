@@ -15,6 +15,8 @@ export const Chat = () => {
 		}
 	];
 
+
+
 	return (
 		<div className={styles.chatWrapper}>
 			<div>
@@ -35,6 +37,5 @@ export const Chat = () => {
 	)
 }
 
-const str = 'Замыкание - это $c:01::1:функция^ и внешние переменные. $d^ Ярким примером замыкания является' +
-	'функция со счетчиком: $n^$an:1:$cfunction { $n:2^}^^$d^$a:1:12:w:myFn ^^';
+
 
