@@ -15,5 +15,29 @@ export const TAGS = {
 	l: {
 		attr: 2,
 		content: true,
+	},
+	bn: {
+		attr: 0,
+		content: true,
+	},
+	n: {
+		attr: 1,
+		content: false,
+	},
+	c: {
+		attr: 0,
+		content: true,
+	},
+	d: {
+		attr: 1,
+		content: false,
+	},
+	an: {
+		attr: 1,
+		content: true,
+	},
+	a: {
+		attr: 3,
+		content: true,
 	}
 }

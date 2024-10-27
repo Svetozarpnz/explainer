@@ -5,9 +5,10 @@ export type Message = {
     text: string;
 }
 
-export type TagData = {
+export type NodeData = {
     name: TagNames | null;
     attr: string[] | null;
-    content:  null | (TagData | string)[];
-    parent: TagData | null;
+    content:  null | (NodeData | string)[];
+    parent: number | null;
+    id: number;
 }

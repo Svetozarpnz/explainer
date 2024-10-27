@@ -1,10 +1,8 @@
-import {allSpecSymbols, S, TagNames, TAGS, tagSpecSymbols} from '../constants';
-import {TagData} from '../types/common';
-import {getTagNameError} from './error';
+// noinspection LanguageDetectionInspection
 
-// const str = 'Замыкание - это $c:01::1:функция^ и внешние переменные. $d^ Ярким примером замыкания является' +
-// 	'функция со счетчиком: $n^$an:1:$cfunction { $n:2^}^^$d^$a:1:12:w:myFn ^^';
-// const difficultTag = '◄an:1:◄c•function { ◄n•2►}►►◄d►◄a•1•12•w•myFn ►'
+import {allSpecSymbols, S, TagNames, TAGS, tagSpecSymbols} from '../constants';
+import {NodeData} from '../types/common';
+import {getTagNameError} from './error';
 
 export const getTagName = (str: string, i: number) => {
 	const tagStartPosition = i + 1;
@@ -23,15 +21,12 @@ export const getTagName = (str: string, i: number) => {
 	return tagName;
 }
 
-export const parseTag = (str: string) => {
-
-}
-
 type State = {
+	id: number;
 	name: TagNames | null;
 	attr: string[] | null;
-	content:  null | (TagData | string)[];
-	parent: TagData | null;
+	content:  null | (NodeData | string)[];
+	parent: number | null;
 	currentTagName: string;
 	currentAttribute: string;
 	currentContent: string;
@@ -39,6 +34,7 @@ type State = {
 };
 
 export const initialState: State = {
+	id: NaN,
 	name: null,
 	attr: null,
 	content: null,
@@ -49,59 +45,147 @@ export const initialState: State = {
 	positionInTag: 0,
 };
 
-export const getInitalState = (parent: TagData | null = null) => Object.assign({}, { ...initialState, parent });
+export const emptyNode = {
+	id: NaN,
+	name: null,
+	attr: null,
+	content: null,
+	parent: null,
+}
+
+export const getInitalState = (parent: number | null, id: number, prevState: State = initialState) =>
+	Object.assign({}, { ...initialState, ...prevState, parent, id });
 
 export const hasTag = (tag: string | null): tag is TagNames => Object.keys(TAGS).includes(tag as string);
-export const getTagDataFromState = (state: State) => {
-	const { currentContent, currentAttribute, currentTagName } = state;
-	if (currentContent) {
-		if (!state.content) {
-			state.content = new Array<TagData>();
-		}
-		state.content.push(currentContent);
-	}
-	if (currentAttribute) {
-		if (!state.attr) {
-			state.attr = new Array<string>();
-		}
-		state.attr.push(currentAttribute);
-	}
-	if (currentTagName) {
-		if (hasTag(currentTagName)) {
-			state.name = currentTagName;
-		} else {
-			throw getTagNameError(currentTagName);
-		}
-	}
-	const { name, attr, content, parent } = state;
 
-	return { name, attr, content, parent };
-}
-
-export const addNewTagToParentContent = (state: State) => {
-	if (!state.parent) {
-		throw new Error('addNewTagToParentContent нельзя вызывать со state без родителя');
-	}
-	if (!state.parent.content) {
-		state.parent.content = [];
-	}
-	const parentContent = state.parent?.content ?? [];
-	const newTag = getTagDataFromState(state);
-	parentContent.push(newTag);
-}
+export const checkIsContentPosition = (state: State) => state.positionInTag === getContentPositionByTagName(state.name);
 
 export const getContentPositionByTagName = (tagName: TagNames | null) => {
 	const tag = hasTag(tagName) ? TAGS[tagName] : null;
 
-	return tag?.content ? tag.attr + 1 : NaN;
+	if (tag === undefined) {
+		throw getTagNameError(tagName as string);
+	}
+
+	return tag?.content ? tag.attr + 1 : 0;
 }
 
-export 	const parse = (str: string) => {
-	const globalTag = getTagDataFromState({ ...initialState });
-	let state = getInitalState(globalTag);
+export const getAttrCount = (tagName: TagNames | null) => {
+	const tag = hasTag(tagName) ? TAGS[tagName] : null;
+	if (tag === undefined) {
+		throw getTagNameError(tagName as string);
+	}
+	return tag?.attr || 0;
+}
+
+export 	const parse = (str: string, setState?: (state: any) => void) => {
+
+	const generateId = (() => {
+		let id = 0;
+
+		return () => id++
+	})();
+
+	const createNode = (parent: number) => {
+		const id = generateId();
+		nodes[id] = {
+			...emptyNode,
+			parent,
+			id,
+		};
+
+		return id;
+	};
+
+	const getNodeFromState = (state: State) => {
+		const { currentContent, currentAttribute, currentTagName } = state;
+		if (currentContent) {
+			if (!state.content) {
+				state.content = new Array<NodeData>();
+			}
+			state.content.push(currentContent);
+		}
+		if (currentAttribute) {
+			if (!state.attr) {
+				state.attr = new Array<string>();
+			}
+			state.attr.push(currentAttribute);
+		}
+
+		if (currentTagName) {
+			if (hasTag(currentTagName)) {
+				state.name = currentTagName;
+			} else {
+				throw getTagNameError(currentTagName);
+			}
+		}
+		const { name, attr, content, parent } = state;
+
+		const id = generateId();
+		const currentNode = { name, attr, content, parent, id };
+
+		nodes[id] = currentNode;
+
+		return currentNode;
+	};
+
+	const addNodeToContent = (state: State, nodeId: number) => {
+		const parentNode = nodes[state.id];
+		if (!parentNode.content) {
+			parentNode.content = [];
+		}
+		// @ts-ignore content теперь точно массив
+		parentNode.content.push(nodeId);
+	};
+
+	const addStateToCurrentNode = (state: State, i: number) => {
+		const node = nodes[state.id];
+
+		if (!state.name && state.id !== 0) {
+			throw new Error(`У тега нет имени. Позиция: ${i}`);
+		}
+
+		//добавляем имя тега в узел
+		if (state.name) {
+			node.name = state.name;
+		}
+
+		// добавляем аттрибуты в узел
+		if (state.attr) {
+			node.attr = state.attr;
+		} else if (state.currentAttribute) {
+			node.attr = [];
+		}
+		if (state.currentAttribute) {
+			// @ts-ignore attr теперь точно массив
+			node.attr.push(state.currentAttribute);
+		}
+
+		// добавляем контент в узел
+		if (!node.content) {
+			node.content = [];
+		}
+		if (state.currentContent && node.content) {
+			// @ts-ignore content теперь точно массив
+			node.content.push(state.currentContent);
+		}
+	};
+
+	const getStateFromNodes = (parentId: number): State => {
+		const node = nodes[parentId];
+
+		return {
+			...initialState,
+			...node,
+			positionInTag: getContentPositionByTagName(node.name),
+		}
+	};
+
+	const nodes: Record<number, NodeData> = {};
+	const rootNode = getNodeFromState({ ...initialState });
+	let state: State = getInitalState(null, rootNode.id);
 
 	for (let i = 0; i < str.length; i++) {
-		console.log('state: ', state);
 		const prev = str[i - 1];
 		const symbol = str[i];
 		const next = str[i + 1];
@@ -114,33 +198,52 @@ export 	const parse = (str: string) => {
 		const isCloseSymbol = symbol === S.C && !hasEscapeBefore;
 		const isDevideSymbol = symbol === S.D && !hasEscapeBefore;
 
-		const isGlobalContent = state.parent === globalTag;
-		const isTagNamePosition = !isGlobalContent && state.positionInTag === 0;
-		const isContentPosition = state.positionInTag === getContentPositionByTagName(state.name);
-		const isAttributePosition = !isTagNamePosition && !isContentPosition;
+		const isRootContent = state.parent === null;
+		const isTagNamePosition = !isRootContent && state.positionInTag === 0;
+		const isAttributePosition = !isTagNamePosition && !checkIsContentPosition(state);
+
+		// console.log(`${i}: ${symbol}`);
+		// if (i === NaN) {
+		// 	debugger;
+		// }
+
+		setState?.((prev: any) => {
+			// console.log(prev[0])
+			return [...prev, {
+				state, symbol, nodes
+			}]
+		});
 
 		if (isOpenSymbol) {
-			// при открытом символе тега создаем тег-объект из текущего state и записываем его в родители новом state
-			addNewTagToParentContent(state);
-			state = getInitalState(state.parent);
+			if (!checkIsContentPosition(state)) {
+				// открывающий тег должен быть только в позиции контента (не атрибута, не имени тега)
+				throw new Error(`Открывающий тег в неверной позиции: ${i}`);
+			}
+
+			// добавляем контент из state в текущий узел
+			addStateToCurrentNode(state, i);
+
+			// создаем новый узел
+			const idForNewNode = createNode(state.id);
+
+			// добавляем новый узел в контент текущего узла
+			addNodeToContent(state, idForNewNode);
+
+			// сбрасываем state и записываем в него новый узел
+			state = getInitalState(state.id, idForNewNode);
+
 			continue;
 		}
 
 		if (isCloseSymbol) {
-			// при закрытом символе тега создаем тег-объект из текущего state, добавляем  в контент родителя и меняем родителя на верхнего
-			addNewTagToParentContent(state);
-			if (state.parent) {
-				state = getInitalState(state.parent.parent);
-			} else {
+			if (state.parent === null) {
+				// закрывающий тег не должен быть в корневом узле
 				throw new Error(`Закрывающий тег в неправильной позиции: ${i}`);
 			}
-			continue;
-		}
-
-		if (isDevideSymbol) {
-			// при разделительном символе записываем имя тега или атрибута в состояние и увеличиваем позицию
-      const { currentTagName, currentAttribute} = state;
-			if (state.currentTagName) {
+			// записываем имя, если тег без атрибутов и контента
+			if (isTagNamePosition) {
+				// проверяем имя тега
+				const {currentTagName} = state;
 				if (hasTag(currentTagName)) {
 					state.name = currentTagName;
 					state.currentTagName = '';
@@ -148,7 +251,29 @@ export 	const parse = (str: string) => {
 					throw getTagNameError(currentTagName);
 				}
 			}
-			if (currentAttribute) {
+
+			// добавляем контент состояния в контент текущего узла
+			addStateToCurrentNode(state, i);
+
+			// записываем в состояние родительский узел
+			state = getStateFromNodes(state.parent);
+
+			continue;
+		}
+
+		if (isDevideSymbol) {
+			// при разделительном символе записываем имя тега или атрибута в состояние и увеличиваем позицию
+			const {currentTagName, currentAttribute} = state;
+			if (isTagNamePosition) {
+				// проверяем имя тега
+				if (hasTag(currentTagName)) {
+					state.name = currentTagName;
+					state.currentTagName = '';
+				} else {
+					throw getTagNameError(currentTagName);
+				}
+			}
+			if (isAttributePosition && currentAttribute) {
 				if (!state.attr) {
 					state.attr = new Array<string>();
 				}
@@ -167,18 +292,22 @@ export 	const parse = (str: string) => {
 			state.currentTagName += symbol;
 			continue;
 		}
+
 		if (isAttributePosition) {
 			state.currentAttribute += symbol;
+			continue;
 		}
 
 		state.currentContent += symbol;
 	}
 
 	if (state.currentContent) {
-		if (!globalTag.content) {
-			globalTag.content = new Array<TagData>();
+		if (!rootNode.content) {
+			rootNode.content = new Array<NodeData>();
 		}
-		globalTag.content.push(state.currentContent);
+		rootNode.content.push(state.currentContent);
 	}
-	return globalTag;
+	// console.log(str);
+	// console.log(nodes);
+	return nodes;
 }

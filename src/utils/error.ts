@@ -1,1 +1,1 @@
-export const getTagNameError = (tagName: string) => new Error(`Неверное имя тега: ${tagName}`);Error
+export const getTagNameError = (tagName: string) => new Error(`Неверное имя тега: ${tagName}`);
