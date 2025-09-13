@@ -22,6 +22,10 @@
 .chatWrapper > div:last-child {
     width: 300px;
 }
+
+.messageContainer {
+    overflow-y: auto;
+}
 .messageWrapper {
     width: 100%;
     margin: 10px 0;
@@ -34,7 +38,8 @@
 }
 
 .question {
-    color: saddlebrown;
+    color: #0074D9;
+    font-weight: bold;
 }
 
 .answer {

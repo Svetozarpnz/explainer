@@ -1,9 +1,11 @@
 .link {
-    color: saddlebrown;
+    color: chocolate;
     cursor: pointer;
+    font-weight: bold;
 }
 
 .visited {
-    color: black;
+    color: saddlebrown;
     cursor: pointer;
+    font-weight: bold;
 }

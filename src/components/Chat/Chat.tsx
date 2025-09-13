@@ -19,7 +19,7 @@ export const Chat = () => {
 
 	return (
 		<div className={styles.chatWrapper}>
-			<div>
+			<div className={styles.messageContainer}>
 				{messages.map(({isQuestion, text}, i) => {
 					return (
 						<div className={cn(styles.messageWrapper, isQuestion ? styles.question : styles.answer)} key={i}>
