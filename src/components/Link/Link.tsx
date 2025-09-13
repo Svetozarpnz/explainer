@@ -4,16 +4,20 @@ import {Context} from "../Context/Context";
 
 type Prop = {
     id: string;
-    children: string;
+    children: React.ReactNode;
     question: string;
 }
 
 export const Link = ({ id, question, children }: Prop) => {
-    const { createMessage } = useContext(Context);
+    const { createMessage, showMessage, shownMessages } = useContext(Context);
     const handleClick = () => {
         createMessage(id, question);
+        showMessage(id);
     }
+    const isVisited = shownMessages.has(id);
+    const className = isVisited ? styles.visited : '';
+
     return (
-        <span onClick={handleClick} className={styles.link}>{children}</span>
+        <span onClick={handleClick} className={styles.link + ' ' + className}>{children}</span>
     )
 }

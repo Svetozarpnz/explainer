@@ -31,7 +31,11 @@ export const Chat = () => {
 				})}
 			</div>
 			<div>
-				{topics.map(({id, question, topic}) => (<Link key={id} id={id} question={question}>{topic}</Link>))}
+				{topics.map(({id, question, topic}) => (
+					<p>
+						<Link key={id} id={id} question={question}>{topic}</Link>
+					</p>
+				))}
 			</div>
 		</div>
 	)

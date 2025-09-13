@@ -9,7 +9,7 @@ const rootNodeBase = {
 	parent: null
 }
 
-describe('parse', () => {
+describe('Функция parse', () => {
 	it('Отделяет содержимое тега от обычного текста', () => {
 		const input = simpleMessage;
 		const expectedOutput = {
@@ -28,7 +28,7 @@ describe('parse', () => {
 
 		const result = parse(input);
 
-		console.log(result);
+		// console.log(result);
 
 		expect(result).toEqual(expectedOutput);
 	})

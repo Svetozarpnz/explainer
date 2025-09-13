@@ -2,3 +2,8 @@
     color: saddlebrown;
     cursor: pointer;
 }
+
+.visited {
+    color: black;
+    cursor: pointer;
+}

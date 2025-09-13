@@ -2,13 +2,17 @@ import {TagNames} from '../constants';
 
 export type Message = {
     isQuestion?: boolean;
-    text: string;
+    text: React.ReactNode;
 }
+
+export type NodeContent = string | number;
 
 export type NodeData = {
     name: TagNames | null;
     attr: string[] | null;
-    content:  null | (NodeData | string)[];
+    content:  null | (NodeContent)[];
     parent: number | null;
     id: number;
 }
+
+export type MMLNodes = Record<number, NodeData>;

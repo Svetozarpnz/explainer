@@ -30,8 +30,6 @@
 .message {
     display: flex;
     max-width: 500px;
-    border: 1px solid black;
-    border-radius: 5px;
     padding: 10px;
 }
 

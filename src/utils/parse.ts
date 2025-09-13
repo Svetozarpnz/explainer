@@ -1,8 +1,9 @@
 // noinspection LanguageDetectionInspection
 
 import {allSpecSymbols, S, TagNames, TAGS, tagSpecSymbols} from '../constants';
-import {NodeData} from '../types/common';
+import { MMLNodes, NodeContent, NodeData } from '../types/common';
 import {getTagNameError} from './error';
+import { hasTag } from './hasTags';
 
 export const getTagName = (str: string, i: number) => {
 	const tagStartPosition = i + 1;
@@ -21,12 +22,7 @@ export const getTagName = (str: string, i: number) => {
 	return tagName;
 }
 
-type State = {
-	id: number;
-	name: TagNames | null;
-	attr: string[] | null;
-	content:  null | (NodeData | string)[];
-	parent: number | null;
+type State = NodeData & {
 	currentTagName: string;
 	currentAttribute: string;
 	currentContent: string;
@@ -55,8 +51,6 @@ export const emptyNode = {
 
 export const getInitalState = (parent: number | null, id: number, prevState: State = initialState) =>
 	Object.assign({}, { ...initialState, ...prevState, parent, id });
-
-export const hasTag = (tag: string | null): tag is TagNames => Object.keys(TAGS).includes(tag as string);
 
 export const checkIsContentPosition = (state: State) => state.positionInTag === getContentPositionByTagName(state.name);
 
@@ -101,7 +95,7 @@ export 	const parse = (str: string, setState?: (state: any) => void) => {
 		const { currentContent, currentAttribute, currentTagName } = state;
 		if (currentContent) {
 			if (!state.content) {
-				state.content = new Array<NodeData>();
+				state.content = new Array<NodeContent>();
 			}
 			state.content.push(currentContent);
 		}
@@ -181,7 +175,7 @@ export 	const parse = (str: string, setState?: (state: any) => void) => {
 		}
 	};
 
-	const nodes: Record<number, NodeData> = {};
+	const nodes: MMLNodes = {};
 	const rootNode = getNodeFromState({ ...initialState });
 	let state: State = getInitalState(null, rootNode.id);
 
@@ -303,7 +297,7 @@ export 	const parse = (str: string, setState?: (state: any) => void) => {
 
 	if (state.currentContent) {
 		if (!rootNode.content) {
-			rootNode.content = new Array<NodeData>();
+			rootNode.content = new Array<NodeContent>();
 		}
 		rootNode.content.push(state.currentContent);
 	}
