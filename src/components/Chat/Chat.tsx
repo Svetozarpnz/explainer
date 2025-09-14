@@ -12,6 +12,9 @@ export const Chat = () => {
 		},
 		{
 			id: '02', question: 'Что есть функция в JS?', topic: 'Функции'
+		},
+		{
+			id: '03', question: 'Расскажи про инструмент Explainer', topic: 'Про Explainer'
 		}
 	];
 
